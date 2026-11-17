@@ -577,7 +577,38 @@ static uint32_t slot_of(int reg) {
 
 /* ---- instruction groups ---- */
 
+/* EOR3 Vd, Vn, Vm, Va (FEAT_SHA3, Armv8.4) does not exist on A12X-class hosts, but macOS is built for an
+   M1 baseline and uses it without checking. Rewrite it as two EORs (or a register move) that handle every
+   way Vd can alias the sources, so no scratch register is needed. Vd = Vn ^ Vm ^ Va. */
+static int translate_eor3(Emit *e, uint32_t insn) {
+    if ((insn & 0xffe08000u) != 0xce000000u) return 0;
+    uint32_t d = insn & 31, n = (insn >> 5) & 31, a = (insn >> 10) & 31, m = (insn >> 16) & 31;
+#define V_EOR(dd, x, y) put(e, 0x6e201c00u | ((y) << 16) | ((x) << 5) | (dd))
+#define V_MOV(dd, x) put(e, 0x4ea01c00u | ((x) << 16) | ((x) << 5) | (dd))
+    if (d == n && d == m && d == a) {
+        /* x ^ x ^ x = x: nothing to do */
+    } else if (d == n && d == a) {
+        V_MOV(d, m);                        /* x ^ m ^ x = m */
+    } else if (d == n && d == m) {
+        V_MOV(d, a);                        /* x ^ x ^ a = a */
+    } else if (d == m && d == a) {
+        V_MOV(d, n);                        /* n ^ x ^ x = n */
+    } else if (d == n) {
+        V_EOR(d, d, m); V_EOR(d, d, a);
+    } else if (d == m) {
+        V_EOR(d, d, n); V_EOR(d, d, a);
+    } else if (d == a) {
+        V_EOR(d, d, n); V_EOR(d, d, m);
+    } else {
+        V_EOR(d, n, m); V_EOR(d, d, a);
+    }
+#undef V_EOR
+#undef V_MOV
+    return 1;
+}
+
 static void translate_copy(Emit *e, uint32_t insn) {
+    if (translate_eor3(e, insn)) return;
     uint32_t fields = hv_gpr_fields(insn);
     if (!fields) {
         put(e, insn);
