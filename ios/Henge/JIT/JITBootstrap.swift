@@ -38,6 +38,7 @@ enum JITBootstrap {
     /// Without this, a `brk` that StikDebug is not there to service is a fatal
     /// SIGTRAP rather than a failed call — the process simply dies.
     static func installTrapGuard() {
+        henge_ios_jit_set_txm_enforced(deviceEnforcesTXM)
         HengeLog.log("jit", "installing brk trap guard")
         henge_ios_jit_install_trap_handler()
         HengeLog.log("jit", "trap guard installed -- an unserviced brk will now "
@@ -350,9 +351,8 @@ enum JITBootstrap {
     /// Whether this iOS lets a process that is marked as debugged make executable memory for itself, as opposed to needing a
     /// debugger to hand it out: true before iOS 26, which is when the Trusted Execution Monitor arrived. It is what makes
     /// TrollStore and jailbreaks enough, without StikDebug.
-    static var canGrantOwnJIT: Bool {
-        if #available(iOS 26, *) { return false }
-        return true
+     static var canGrantOwnJIT: Bool {
+        return !deviceEnforcesTXM
     }
 
     /// henge-jit.js as standard base64, which Built-in StikJIT's custom script takes.
