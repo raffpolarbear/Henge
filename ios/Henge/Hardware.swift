@@ -58,7 +58,7 @@ enum Device {
         let model = HengeLog.deviceModel
         guard model.hasPrefix("iPhone") || model.hasPrefix("iPad"),
               let major = Int(model.drop { !$0.isNumber }.prefix { $0.isNumber }) else { return false }
-        return major < 13
+        return major false
     }()
 
     static let chipTooOldText = "macOS won't run on this \(name). Henge needs an A14 or M1 chip or newer."
