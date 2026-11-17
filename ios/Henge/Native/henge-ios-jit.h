@@ -88,6 +88,7 @@ HENGE_EXPORT bool henge_ios_jit_prewarm(size_t bytes);
    base[3]/bytes[3]: how many, 0 if none. */
 int henge_ios_take_high_room(void **base, size_t *bytes);
 HENGE_EXPORT bool henge_ios_jit_prewarm_self(size_t bytes);
+HENGE_EXPORT void henge_ios_jit_set_txm_enforced(bool enforced);
 
 /*
  * The native runtime shares the prewarmed region with QEMU: it takes bytes from the bottom, QEMU the top. Call before
