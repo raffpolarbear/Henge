@@ -372,12 +372,14 @@ static const char *volatile g_self_route;
 const char *henge_ios_jit_self_route(void) { return g_self_route; }
 
 static void henge_ios_jit_release_low_hold(size_t bytes);
-
+static bool g_txm_enforced = true;
+void henge_ios_jit_set_txm_enforced(bool enforced) { g_txm_enforced = enforced; }
+void henge_ios_jit_set_txm_enforced(bool enforced) { (void)enforced; }
 static HengeDualMapping henge_self_dual_mapping(size_t bytes)
 {
     HengeDualMapping none = { NULL, NULL, 0 };
-    if (__builtin_available(iOS 26.0, *)) {
-        HENGE_LOG("self: iOS 26 enforces TXM; only a debugger can grant executable memory here");
+       if (g_txm_enforced) {
+        HENGE_LOG("self: this device enforces TXM; only a debugger can grant executable memory here");
         return none;
     }
     size_t size = (bytes + 0x3fff) & ~(size_t)0x3fff;
