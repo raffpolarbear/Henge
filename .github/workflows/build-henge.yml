@@ -96,7 +96,9 @@ jobs:
       - name: Build the engine
         working-directory: Henge
         run: make ios-lib
-
+      - name: Build the Mac helper and sample programs
+        working-directory: Henge
+        run: make build/henge-agent.gz build/tl-samples.dmg
       - name: Package Henge.ipa
         working-directory: Henge
         run: zsh ios/scripts/package_ipa.sh
