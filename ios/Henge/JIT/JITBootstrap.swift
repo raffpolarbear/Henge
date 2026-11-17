@@ -96,7 +96,7 @@ enum JITBootstrap {
         // a debugger that attached and let go such as TrollStore's enable-jit, or dynamic-codesigning),
         // so it does not wait for CS_DEBUGGED there if jailbroken: Dopamine hides that flag from apps unless
         // "Allow JIT in Apps" is on, while still letting them run code they wrote.
-        guard isDebuggerAttached || (canGrantOwnJIT && !selfGrantTried) else {
+        guard isDebuggerAttached || (canGrantOwnJIT && !selfGrantTried && (isJailbroken || mapJITWorks)) else {
             HengeLog.log("jit", "no debugger attached yet; not prewarming")
             return false
         }
