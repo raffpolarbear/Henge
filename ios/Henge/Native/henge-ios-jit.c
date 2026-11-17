@@ -374,7 +374,6 @@ const char *henge_ios_jit_self_route(void) { return g_self_route; }
 static void henge_ios_jit_release_low_hold(size_t bytes);
 static bool g_txm_enforced = true;
 void henge_ios_jit_set_txm_enforced(bool enforced) { g_txm_enforced = enforced; }
-void henge_ios_jit_set_txm_enforced(bool enforced) { (void)enforced; }
 static HengeDualMapping henge_self_dual_mapping(size_t bytes)
 {
     HengeDualMapping none = { NULL, NULL, 0 };
